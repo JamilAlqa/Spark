@@ -1,0 +1,26 @@
+{
+  "order": 3,
+  "title": "Savour",
+  "type": "Product",
+  "motif": "steam",
+  "palette": { "bg": "#FFF0C2", "accent": "#9A6B00", "ink": "#3C2A00" },
+  "tagline": "A slower way to keep the meals worth remembering.",
+  "blurb": "Memory over ratings — a considered log for food experiences.",
+  "hash": "b29c771",
+  "updated": "1w ago",
+  "started": "2026",
+  "lineage": "Original · 0 forks",
+  "desc": [
+    "Placeholder pitch — replace with Savour's real one. The shape: food apps optimize for ratings and discovery; Savour optimizes for memory and taste developed over time.",
+    "On Spark, this page would carry its decision log (why no star ratings, why private-first), trials, and a context bundle so the concept itself is forkable."
+  ],
+  "demos": [],
+  "commits": [
+    { "hash": "b29c771", "tag": "v0.1", "msg": "Initial concept and direction", "meta": "Jamil · 1w ago" }
+  ],
+  "files": ["vision.md", "roadmap.md"],
+  "stats": { "watching": 5, "forks": 0, "contributors": 1 },
+  "team": [
+    { "init": "JA", "color": "#161618", "name": "Jamil", "role": "Originator" }
+  ]
+}

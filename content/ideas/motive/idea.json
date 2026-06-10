@@ -1,0 +1,29 @@
+{
+  "order": 2,
+  "title": "Motive",
+  "type": "Product",
+  "motif": "wheel",
+  "palette": { "bg": "#DCE7FF", "accent": "#1E3FBF", "ink": "#0B1840" },
+  "tagline": "Car culture as content — auctions told as stories, not listings.",
+  "blurb": "Curated collections, a structured car archive, and a garage of your own.",
+  "hash": "f71d20e",
+  "updated": "3d ago",
+  "started": "Jun 2026",
+  "lineage": "Original · 1 fork",
+  "desc": [
+    "Auction platforms treat cars as inventory. Motive treats them as stories — each car a page with provenance, photography, and the context that makes it matter to the culture around it.",
+    "Built as a Next.js platform with curated collections, a typed car archive, and 'the garage' — a personal space for the cars you follow and the ones you've owned."
+  ],
+  "demos": [
+    { "label": "Dev build — collections & archive", "note": "4 seed cars · localhost walkthrough" }
+  ],
+  "commits": [
+    { "hash": "f71d20e", "tag": "v0.2", "msg": "Theme system + garage scaffold; collections wired to seed data", "meta": "Jamil · 3d ago" },
+    { "hash": "c11a9b3", "tag": "v0.1", "msg": "Scaffold: app pages, car types, 4 seed cars, 4 collections", "meta": "Jamil · 4d ago" }
+  ],
+  "files": ["vision.md", "roadmap.md", "types/car.ts", "data/cars/", "data/collections/"],
+  "stats": { "watching": 8, "forks": 1, "contributors": 1 },
+  "team": [
+    { "init": "JA", "color": "#161618", "name": "Jamil", "role": "Originator · product & build" }
+  ]
+}

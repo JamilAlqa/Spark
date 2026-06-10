@@ -1,0 +1,28 @@
+{
+  "order": 6,
+  "title": "Do weights count as authorship?",
+  "type": "Conversation",
+  "motif": "asterisk",
+  "palette": { "bg": "#FFDEEA", "accent": "#BE185D", "ink": "#43102A" },
+  "tagline": "An open conversation with a living, merged summary.",
+  "blurb": "174 contributions; the strongest arguments get merged and credited.",
+  "hash": "s12.0e4",
+  "updated": "2d ago",
+  "started": "Apr 2026",
+  "lineage": "Open conversation",
+  "desc": [
+    "Some ideas are questions. This page holds an argument the way a repo holds code: positions are proposed, the strongest survive review, and the merged summary is the living state of the debate.",
+    "Every contributor whose argument shapes the summary is credited in the history — the same attribution graph that powers product and research pages."
+  ],
+  "demos": [
+    { "label": "Living summary v12", "note": "Merged from 31 accepted positions" }
+  ],
+  "commits": [
+    { "hash": "s12.0e4", "tag": "merge", "msg": "Summary v12: training-data provenance section rewritten", "meta": "74 contributors · 2d ago" }
+  ],
+  "files": ["summary.md", "positions/", "moderation.md"],
+  "stats": { "watching": 412, "forks": 0, "contributors": 74 },
+  "team": [
+    { "init": "+", "color": "#BE185D", "name": "74 contributors", "role": "Open to all · merged-position credit" }
+  ]
+}

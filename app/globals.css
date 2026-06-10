@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fbfaf7;
+  --ink: #161618;
+  --gray: #73737b;
+  --faint: #a6a6ad;
+  --line: #e8e6df;
+  --accent: #f4571f;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------- locked type scale ---------- */
+.t-display {
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+}
+.t-section {
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.t-title {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.t-body {
+  font-size: 15px;
+  color: var(--gray);
+}
+.t-meta {
+  font-size: 13px;
+  color: var(--faint);
+}
+.t-label {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- entrance ---------- */
+.rise {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: riseIn 0.65s cubic-bezier(0.22, 0.8, 0.3, 1) forwards;
+}
+@keyframes riseIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn:hover {
+  border-color: var(--ink);
+}
+.btn-dark {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.btn-dark:hover {
+  background: #000;
+}
+.btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--gray);
+}
+.btn-quiet:hover {
+  color: var(--ink);
+  border-color: transparent;
+}
+
+/* ---------- gallery rail ---------- */
+.rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 6px 6px 28px;
+  scrollbar-width: none;
+  cursor: grab;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail.dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.idea-card {
+  position: relative;
+  flex: 0 0 290px;
+  height: 380px;
+  scroll-snap-align: start;
+  border-radius: 22px;
+  padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1),
+    box-shadow 0.35s;
+}
+.idea-card:hover {
+  transform: translateY(-8px) rotate(-0.4deg);
+  box-shadow: 0 24px 48px -24px rgba(22, 22, 24, 0.28);
+}
+.idea-card .motif {
+  position: absolute;
+  right: -28px;
+  top: -10px;
+  width: 190px;
+  height: 190px;
+  opacity: 0.85;
+  transition: transform 0.5s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.idea-card:hover .motif {
+  transform: rotate(7deg) scale(1.07);
+}
+
+.arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.arrow-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* ---------- idea page ---------- */
+.hero-band {
+  border-radius: 26px;
+  padding: 44px 44px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-band .motif {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 230px;
+  height: 230px;
+  opacity: 0.8;
+}
+@media (max-width: 720px) {
+  .hero-band {
+    padding: 30px 26px;
+  }
+  .hero-band .motif {
+    opacity: 0.25;
+  }
+}
+
+.tab-btn {
+  padding: 10px 2px;
+  margin-right: 26px;
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--faint);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  background: none;
+  transition: color 0.15s;
+}
+.tab-btn:hover {
+  color: var(--ink);
+}
+.tab-btn.on {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.commit-row {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 16px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.commit-row:last-child {
+  border-bottom: none;
+}
+.vpill {
+  font-size: 11px;
+  font-weight: 650;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--gray);
+}
+
+.demo-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.demo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -20px rgba(22, 22, 24, 0.25);
+}
+.demo-add {
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--faint);
+  min-height: 120px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.demo-add:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.side-block {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
