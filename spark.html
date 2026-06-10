@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — a home for ideas in the open</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #FBFAF7;
+    --ink: #161618;
+    --gray: #73737B;
+    --faint: #A6A6AD;
+    --line: #E8E6DF;
+    --accent: #F4571F;
+  }
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif; font-size: 15px; line-height: 1.6; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  /* ---------- type scale (use these, nothing else) ---------- */
+  .t-display { font-size: clamp(34px, 5vw, 52px); font-weight: 650; letter-spacing: -0.03em; line-height: 1.06; }
+  .t-section { font-size: 21px; font-weight: 650; letter-spacing: -0.01em; }
+  .t-title   { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+  .t-body    { font-size: 15px; color: var(--gray); }
+  .t-meta    { font-size: 13px; color: var(--faint); }
+  .t-label   { font-size: 11px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ---------- views & transitions ---------- */
+  .view { display: none; opacity: 0; transform: translateY(8px); }
+  .view.active { display: block; animation: viewIn .45s cubic-bezier(.22,.8,.3,1) forwards; }
+  @keyframes viewIn { to { opacity: 1; transform: none; } }
+
+  .rise { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.22,.8,.3,1), transform .6s cubic-bezier(.22,.8,.3,1); }
+  .rise.in { opacity: 1; transform: none; }
+
+  /* ---------- nav ---------- */
+  nav { position: sticky; top: 0; z-index: 50; background: rgba(251,250,247,.88); backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+  nav.scrolled { border-bottom-color: var(--line); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13.5px; font-weight: 550; color: var(--ink);
+    border: 1px solid var(--line); background: #fff; border-radius: 999px;
+    padding: 8px 18px; cursor: pointer; transition: all .18s;
+  }
+  .btn:hover { border-color: var(--ink); }
+  .btn.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.dark:hover { background: #000; }
+  .btn.quiet { border-color: transparent; background: transparent; color: var(--gray); }
+  .btn.quiet:hover { color: var(--ink); }
+
+  /* ---------- carousel ---------- */
+  .rail { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 6px 28px; scrollbar-width: none; cursor: grab; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail.dragging { cursor: grabbing; scroll-snap-type: none; }
+
+  .idea-card {
+    position: relative; flex: 0 0 290px; height: 380px; scroll-snap-align: start;
+    border-radius: 22px; padding: 24px; overflow: hidden;
+    display: flex; flex-direction: column; cursor: pointer; user-select: none;
+    transition: transform .35s cubic-bezier(.22,.8,.3,1), box-shadow .35s;
+  }
+  .idea-card:hover { transform: translateY(-8px) rotate(-0.4deg); box-shadow: 0 24px 48px -24px rgba(22,22,24,.28); }
+  .idea-card .motif { position: absolute; right: -28px; top: -10px; width: 190px; height: 190px; opacity: .85; transition: transform .5s cubic-bezier(.22,.8,.3,1); }
+  .idea-card:hover .motif { transform: rotate(7deg) scale(1.07); }
+  .idea-card .idx { position: absolute; left: 24px; top: 18px; font-size: 13px; font-weight: 600; opacity: .45; }
+  .card-stat { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; opacity: .65; }
+
+  .arrow-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--gray); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
+  .arrow-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ---------- idea page ---------- */
+  .hero-band { border-radius: 26px; padding: 44px 44px 40px; position: relative; overflow: hidden; }
+  .hero-band .motif { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 230px; height: 230px; opacity: .8; }
+  @media (max-width: 720px) { .hero-band { padding: 30px 26px; } .hero-band .motif { opacity: .25; } }
+
+  .tab-btn { padding: 10px 2px; margin-right: 26px; font-size: 14px; font-weight: 550; color: var(--faint); border-bottom: 2px solid transparent; cursor: pointer; background: none; transition: color .15s; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.on { color: var(--ink); border-bottom-color: var(--ink); }
+  .pane { display: none; } .pane.active { display: block; animation: viewIn .35s cubic-bezier(.22,.8,.3,1) forwards; }
+
+  .commit-row { display: grid; grid-template-columns: 76px 1fr auto; gap: 16px; align-items: baseline; padding: 16px 2px; border-bottom: 1px solid var(--line); }
+  .commit-row:last-child { border-bottom: none; }
+  .vpill { font-size: 11px; font-weight: 650; padding: 2px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--gray); }
+
+  .demo-card { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; cursor: pointer; transition: transform .25s, box-shadow .25s; }
+  .demo-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -20px rgba(22,22,24,.25); }
+  .demo-add { border: 1.5px dashed var(--line); border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--faint); min-height: 120px; cursor: pointer; transition: all .2s; }
+  .demo-add:hover { border-color: var(--ink); color: var(--ink); }
+
+  .side-block { border-top: 1px solid var(--line); padding: 20px 0; }
+  .file-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 13px; color: var(--gray); }
+
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(90px);
+    background: var(--ink); color: #fff; border-radius: 999px;
+    padding: 10px 24px; font-size: 13px; transition: transform .3s cubic-bezier(.22,.8,.3,1); z-index: 100; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  textarea:focus { outline: none; border-color: var(--ink) !important; }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav id="navbar">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center gap-4">
+    <button class="flex items-center gap-2" onclick="goHome()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L4.5 14 H11 L10 22 L19.5 9 H13 Z"/></svg>
+      <span class="font-semibold" style="letter-spacing:-0.01em">Spark</span>
+    </button>
+    <div class="ml-auto flex items-center gap-2">
+      <button class="btn quiet" onclick="toast('Search — coming in the real build')">Search</button>
+      <button class="btn dark" onclick="toast('New idea: a title and a paragraph. Structure grows as it matures.')">New idea</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= VIEW: HOME ================= -->
+<div class="view active" id="view-home">
+
+  <!-- hero -->
+  <header class="max-w-6xl mx-auto px-6 pt-24 pb-16 md:pt-32 md:pb-20">
+    <p class="t-label rise mb-6" style="color:var(--accent)">A home for ideas in the open</p>
+    <h1 class="t-display rise max-w-2xl mb-6" style="transition-delay:.06s">Show what you're building, who with, and how.</h1>
+    <p class="t-body rise max-w-xl mb-9" style="transition-delay:.12s">Every idea gets a living page — its story, demos, decisions, and team — with a timestamped history that makes sharing your proof, not your risk.</p>
+    <div class="rise flex gap-3" style="transition-delay:.18s">
+      <button class="btn dark" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">Browse ideas</button>
+      <button class="btn" onclick="toast('The thesis: code is the commodity — the idea and its record is the asset')">Why Spark</button>
+    </div>
+  </header>
+
+  <!-- gallery -->
+  <section id="gallery" class="max-w-6xl mx-auto px-6 pb-28">
+    <div class="flex items-end justify-between mb-5">
+      <h2 class="t-section">Ideas in motion</h2>
+      <div class="flex gap-2">
+        <button class="arrow-btn" onclick="slide(-1)" aria-label="Previous"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="arrow-btn" onclick="slide(1)" aria-label="Next"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <div class="rail" id="rail"></div>
+    <p class="t-meta">Drag to explore · ideas surface by activity, not upvotes</p>
+  </section>
+
+  <footer class="max-w-6xl mx-auto px-6 pb-12">
+    <div class="border-t pt-8 flex items-center justify-between" style="border-color:var(--line)">
+      <span class="t-meta">Spark — prototype v3</span>
+      <span class="t-meta">the public record for ideas</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= VIEW: IDEA ================= -->
+<div class="view" id="view-idea">
+  <div class="max-w-5xl mx-auto px-6 pt-10 pb-24">
+
+    <button class="btn quiet mb-6 -ml-3" onclick="goHome()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      All ideas
+    </button>
+
+    <!-- colored hero band -->
+    <div class="hero-band mb-10" id="ideaBand">
+      <div class="motif" id="ideaMotif"></div>
+      <div class="relative" style="max-width:560px">
+        <p class="t-label mb-4" id="ideaType"></p>
+        <h1 class="t-display mb-4" id="ideaTitle"></h1>
+        <p class="t-body mb-7" style="color:inherit; opacity:.75" id="ideaTagline"></p>
+        <div class="flex flex-wrap gap-2.5">
+          <button class="btn dark" onclick="toast('Fork: clones the context bundle and links lineage to this page')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+            Fork
+          </button>
+          <button class="btn" id="watchBtn" onclick="watch()"><span id="watchLabel">Watch</span></button>
+          <button class="btn" onclick="toast('Downloads the bundle — open it in Claude Code and start executing')">Clone bundle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- meta strip -->
+    <div class="flex flex-wrap items-center gap-x-7 gap-y-2 mb-10 t-meta" id="ideaMetaStrip"></div>
+
+    <div class="grid lg:grid-cols-[1fr_280px] gap-14">
+      <!-- main -->
+      <div>
+        <div class="flex border-b mb-8" style="border-color:var(--line)">
+          <button class="tab-btn on" data-p="overview" onclick="tab(this)">Overview</button>
+          <button class="tab-btn" data-p="changes" onclick="tab(this)">Changes</button>
+          <button class="tab-btn" data-p="discussion" onclick="tab(this)">Discussion</button>
+        </div>
+
+        <div class="pane active" id="pane-overview">
+          <div id="ideaDesc" class="space-y-5 mb-12 t-body" style="max-width:600px"></div>
+          <h3 class="t-title mb-5">Demos & trials</h3>
+          <div class="grid sm:grid-cols-2 gap-4" id="ideaDemos"></div>
+        </div>
+
+        <div class="pane" id="pane-changes">
+          <div id="ideaCommits"></div>
+          <p class="t-meta mt-4">Every change is hashed and timestamped at publish. History is public and immutable.</p>
+        </div>
+
+        <div class="pane" id="pane-discussion">
+          <div id="ideaComments" class="space-y-6"></div>
+          <div class="flex gap-3 mt-8">
+            <div class="avatar" style="background:#161618">JA</div>
+            <textarea id="commentInput" rows="2" placeholder="Add to the discussion — or propose a change to the bundle…"
+              class="flex-1 rounded-xl px-4 py-2.5 text-sm bg-white"
+              style="border:1px solid var(--line); color:var(--ink); resize:vertical"></textarea>
+            <button class="btn dark self-start" onclick="addComment()">Post</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- side rail -->
+      <aside>
+        <div class="side-block" style="border-top:none; padding-top:4px">
+          <p class="t-label mb-4" style="color:var(--faint)">About</p>
+          <div class="space-y-2.5 text-sm" id="ideaStats"></div>
+        </div>
+        <div class="side-block">
+          <p class="t-label mb-3" style="color:var(--faint)">Context bundle</p>
+          <div id="ideaFiles"></div>
+          <p class="t-meta mt-3">Contributions arrive as diffs on these files — merged like pull requests, credited forever.</p>
+        </div>
+        <div class="side-block">
+          <p class="t-label mb-4" style="color:var(--faint)">Team</p>
+          <div class="space-y-3.5" id="ideaTeam"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= MOTIFS (per-idea line drawings) ================= */
+const MOTIFS = {
+  bolt: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M55 12 L30 54 H48 L44 88 L74 40 H54 Z"/>
+    <path d="M22 30 l-7 -7 M80 70 l7 7 M78 22 l8 -8 M20 76 l-8 8" stroke-width="2"/>
+  </svg>`,
+  wheel: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round">
+    <circle cx="62" cy="50" r="26"/><circle cx="62" cy="50" r="9"/>
+    <path d="M8 36 H38 M2 50 H32 M8 64 H38" stroke-width="2.2"/>
+  </svg>`,
+  steam: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round">
+    <path d="M24 62 H76 A26 26 0 0 1 50 88 A26 26 0 0 1 24 62 Z"/>
+    <path d="M38 48 c0-8 6-8 6-16 M52 48 c0-8 6-8 6-16 M66 48 c0-8 6-8 6-16" stroke-width="2.2"/>
+  </svg>`,
+  network: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round">
+    <path d="M50 88 V58 M50 58 C50 42 30 46 26 28 M50 58 C50 40 70 48 76 24 M50 70 C42 64 34 66 28 56 M50 64 C60 58 66 60 72 50"/>
+    <circle cx="26" cy="24" r="4" fill="${c}" stroke="none"/><circle cx="76" cy="20" r="4" fill="${c}" stroke="none"/>
+    <circle cx="28" cy="52" r="3.4" fill="${c}" stroke="none"/><circle cx="73" cy="46" r="3.4" fill="${c}" stroke="none"/>
+  </svg>`,
+  arch: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 86 V44 A22 22 0 0 1 72 44 V86"/>
+    <path d="M16 86 H84" stroke-width="2.2"/>
+    <circle cx="50" cy="22" r="4"/>
+  </svg>`,
+  asterisk: c => `<svg viewBox="0 0 100 100" fill="none" stroke="${c}" stroke-width="2.8" stroke-linecap="round">
+    <path d="M50 24 V76 M27 37 L73 63 M73 37 L27 63"/>
+    <circle cx="50" cy="50" r="34" stroke-width="2" stroke-dasharray="3 7"/>
+  </svg>`
+};
+
+/* ================= DATA ================= */
+const IDEAS = {
+  spark: {
+    title: "Spark", type: "Concept", motif: "bolt",
+    bg: "#FFE3D3", accentDark: "#B33B12", ink: "#3A1505",
+    tagline: "The public record for ideas — show what you're building, who with, and how.",
+    blurb: "Versioned idea pages, executable context bundles, forks that carry lineage.",
+    hash: "a3f2c91", updated: "2h ago", started: "Jun 10, 2026", lineage: "Original · 0 forks",
+    desc: [
+      "People sit on ideas because sharing feels risky, and the thinking behind projects — the orchestration — lives on whiteboards and scattered docs with no public, versioned home. GitHub holds the artifacts; nobody holds the thinking.",
+      "Spark gives every idea a living page: description, demos, trials, team, and a decision log with timestamped, immutable history. Publishing openly becomes your receipt. Forks must carry lineage, so attribution is structural.",
+      "Why now: AI is making code the commodity output of ideas. The scarce upstream artifact is intent — prompts, instruction files, roadmaps, decisions. A Spark page packages that as an executable context bundle: fork it, clone it into an agent, and instantiate the project."
+    ],
+    demos: [
+      { label: "Prototype v1 — feed & idea page", note: "Interactive walkthrough" },
+      { label: "Concept framework v0.4", note: "spark-concept.md · living document" }
+    ],
+    commits: [
+      { hash: "a3f2c91", tag: "v0.4", msg: "Decision log promoted to first-class element; orchestration-layer thesis", meta: "Jamil · 2h ago" },
+      { hash: "8be04d2", tag: "v0.3", msg: "Context bundles: ideas as executable artifacts", meta: "Jamil · 3h ago" },
+      { hash: "5c17aa8", tag: "v0.2", msg: "Credit-not-exclusivity principle; squatting concern resolved", meta: "Jamil · 3h ago" },
+      { hash: "e90b3f4", tag: "v0.1", msg: "Initial framework: vision, core objects, interactions, MVP scope", meta: "Jamil · 4h ago" }
+    ],
+    files: ["vision.md", "spark-concept.md", "roadmap.md", "CLAUDE.md", "prompts/", "decisions/"],
+    stats: { Watching: 12, Forks: 0, Contributors: 2 },
+    team: [
+      { init: "JA", color: "#161618", name: "Jamil", role: "Originator · vision, decisions" },
+      { init: "CL", color: "#B33B12", name: "Claude", role: "Collaborator · research, prototypes" }
+    ],
+    comments: [
+      { init: "DA", color: "#2D5BFF", name: "Dev A.", time: "1h ago", text: "The clone-bundle flow is the hook. Forked an idea last week and had a running variant the same day." },
+      { init: "LH", color: "#8B3DFF", name: "Lena H.", time: "2h ago", text: "Appreciate that non-tech ideas aren't second-class here." }
+    ]
+  },
+
+  motive: {
+    title: "Motive", type: "Product", motif: "wheel",
+    bg: "#DCE7FF", accentDark: "#1E3FBF", ink: "#0B1840",
+    tagline: "Car culture as content — auctions told as stories, not listings.",
+    blurb: "Curated collections, a structured car archive, and a garage of your own.",
+    hash: "f71d20e", updated: "3d ago", started: "Jun 2026", lineage: "Original · 1 fork",
+    desc: [
+      "Auction platforms treat cars as inventory. Motive treats them as stories — each car a page with provenance, photography, and the context that makes it matter to the culture around it.",
+      "Built as a Next.js platform with curated collections, a typed car archive, and 'the garage' — a personal space for the cars you follow and the ones you've owned."
+    ],
+    demos: [ { label: "Dev build — collections & archive", note: "4 seed cars · localhost walkthrough" } ],
+    commits: [
+      { hash: "f71d20e", tag: "v0.2", msg: "Theme system + garage scaffold; collections wired to seed data", meta: "Jamil · 3d ago" },
+      { hash: "c11a9b3", tag: "v0.1", msg: "Scaffold: app pages, car types, 4 seed cars, 4 collections", meta: "Jamil · 4d ago" }
+    ],
+    files: ["vision.md", "roadmap.md", "types/car.ts", "data/cars/", "data/collections/"],
+    stats: { Watching: 8, Forks: 1, Contributors: 1 },
+    team: [ { init: "JA", color: "#161618", name: "Jamil", role: "Originator · product & build" } ],
+    comments: []
+  },
+
+  savour: {
+    title: "Savour", type: "Product", motif: "steam",
+    bg: "#FFF0C2", accentDark: "#9A6B00", ink: "#3C2A00",
+    tagline: "A slower way to keep the meals worth remembering.",
+    blurb: "Memory over ratings — a considered log for food experiences.",
+    hash: "b29c771", updated: "1w ago", started: "2026", lineage: "Original · 0 forks",
+    desc: [
+      "Placeholder pitch — replace with Savour's real one. The shape: food apps optimize for ratings and discovery; Savour optimizes for memory and taste developed over time.",
+      "On Spark, this page would carry its decision log (why no star ratings, why private-first), trials, and a context bundle so the concept itself is forkable."
+    ],
+    demos: [],
+    commits: [ { hash: "b29c771", tag: "v0.1", msg: "Initial concept and direction", meta: "Jamil · 1w ago" } ],
+    files: ["vision.md", "roadmap.md"],
+    stats: { Watching: 5, Forks: 0, Contributors: 1 },
+    team: [ { init: "JA", color: "#161618", name: "Jamil", role: "Originator" } ],
+    comments: []
+  },
+
+  mycelium: {
+    title: "Mycelium Packaging", type: "Research", motif: "network",
+    bg: "#DCF2DF", accentDark: "#15803D", ink: "#0A2E16",
+    tagline: "Growing compostable shipping foam from agricultural waste.",
+    blurb: "Open methods, open failures — every batch published as a trial.",
+    hash: "d83e1f0", updated: "5h ago", started: "May 2026", lineage: "Original · 3 forks",
+    desc: [
+      "Polystyrene foam is functionally immortal and functionally unrecyclable. Mycelium grown on agricultural waste can match its cushioning performance and compost in weeks.",
+      "Every batch — including the failures — is published as a trial with method and data attached. Three labs have forked the protocol to test regional substrates; lineage keeps the results comparable."
+    ],
+    demos: [
+      { label: "Batch 3 — compression test", note: "Trial data · CSV + method" },
+      { label: "Growth timelapse", note: "14 days · substrate B" }
+    ],
+    commits: [
+      { hash: "d83e1f0", tag: "trial", msg: "Batch 3 compression results: 2.1 PSI at 40% strain", meta: "Mira K. · 5h ago" },
+      { hash: "97aa3c2", tag: "merge", msg: "Merged: substrate prep revision from fork (rice hull blend)", meta: "T. Singh · 2d ago" },
+      { hash: "41b8e09", tag: "v1.0", msg: "Protocol v1: substrate, inoculation, drying schedule", meta: "Mira K. · 3w ago" }
+    ],
+    files: ["protocol.md", "trials/", "data/", "open-questions.md"],
+    stats: { Watching: 89, Forks: 3, Contributors: 5 },
+    team: [
+      { init: "MK", color: "#15803D", name: "Mira K.", role: "Originator · mycology" },
+      { init: "TS", color: "#2D5BFF", name: "T. Singh", role: "Contributor · materials" }
+    ],
+    comments: []
+  },
+
+  thirdplace: {
+    title: "Third Place", type: "Concept", motif: "arch",
+    bg: "#EBDFFC", accentDark: "#6D28D9", ink: "#241048",
+    tagline: "A neighborhood café with no purchase required.",
+    blurb: "Zoning sagas, funding trials, and an honest membership post-mortem.",
+    hash: "62f0ab4", updated: "1d ago", started: "Mar 2026", lineage: "Original · 1 fork",
+    desc: [
+      "Public space is disappearing into commercial space. Third Place is a working model for a neighborhood room that asks nothing of you — funded, zoned, and staffed in the open so other neighborhoods can fork the playbook.",
+      "The page's value is the orchestration record: three funding models tried, the zoning saga documented decision by decision, and an honest post-mortem on the membership experiment."
+    ],
+    demos: [ { label: "Funding model comparison", note: "Three trials · one survivor" } ],
+    commits: [
+      { hash: "62f0ab4", tag: "team", msg: "Opened 2 roles: architect, community lead", meta: "Lena H. · 1d ago" },
+      { hash: "e3c77d1", tag: "decision", msg: "Drop membership model — creates the exclusion we exist to remove", meta: "Lena H. · 1w ago" }
+    ],
+    files: ["vision.md", "funding-models.md", "zoning-log.md", "decisions/"],
+    stats: { Watching: 203, Forks: 1, Contributors: 4 },
+    team: [
+      { init: "LH", color: "#6D28D9", name: "Lena H.", role: "Originator" },
+      { init: "OG", color: "#161618", name: "Omar G.", role: "Contributor · finance" }
+    ],
+    comments: []
+  },
+
+  weights: {
+    title: "Do weights count as authorship?", type: "Conversation", motif: "asterisk",
+    bg: "#FFDEEA", accentDark: "#BE185D", ink: "#43102A",
+    tagline: "An open conversation with a living, merged summary.",
+    blurb: "174 contributions; the strongest arguments get merged and credited.",
+    hash: "s12.0e4", updated: "2d ago", started: "Apr 2026", lineage: "Open conversation",
+    desc: [
+      "Some ideas are questions. This page holds an argument the way a repo holds code: positions are proposed, the strongest survive review, and the merged summary is the living state of the debate.",
+      "Every contributor whose argument shapes the summary is credited in the history — the same attribution graph that powers product and research pages."
+    ],
+    demos: [ { label: "Living summary v12", note: "Merged from 31 accepted positions" } ],
+    commits: [ { hash: "s12.0e4", tag: "merge", msg: "Summary v12: training-data provenance section rewritten", meta: "74 contributors · 2d ago" } ],
+    files: ["summary.md", "positions/", "moderation.md"],
+    stats: { Watching: 412, Forks: 0, Contributors: 74 },
+    team: [ { init: "+", color: "#BE185D", name: "74 contributors", role: "Open to all · merged-position credit" } ],
+    comments: []
+  }
+};
+
+/* ================= GALLERY ================= */
+const rail = document.getElementById('rail');
+Object.entries(IDEAS).forEach(([slug, d], i) => {
+  const card = document.createElement('div');
+  card.className = 'idea-card';
+  card.style.background = d.bg;
+  card.style.color = d.ink;
+  card.innerHTML = `
+    <span class="idx mono">${String(i + 1).padStart(2, '0')}</span>
+    <div class="motif">${MOTIFS[d.motif](d.accentDark)}</div>
+    <div class="mt-auto relative">
+      <p class="t-label mb-3" style="color:${d.accentDark}">${d.type}</p>
+      <h3 style="font-size:24px; font-weight:650; letter-spacing:-0.02em; line-height:1.15" class="mb-2">${d.title}</h3>
+      <p class="text-sm mb-5" style="opacity:.7; line-height:1.5">${d.blurb}</p>
+      <div class="flex gap-4">
+        <span class="card-stat">${d.stats.Forks} forks</span>
+        <span class="card-stat">${d.stats.Watching} watching</span>
+        <span class="card-stat mono ml-auto">${d.updated}</span>
+      </div>
+    </div>`;
+  card.addEventListener('click', () => { if (!dragged) openIdea(slug); });
+  rail.appendChild(card);
+});
+
+function slide(dir) { rail.scrollBy({ left: dir * 306, behavior: 'smooth' }); }
+
+let isDown = false, startX = 0, startScroll = 0, dragged = false;
+rail.addEventListener('pointerdown', e => { isDown = true; dragged = false; startX = e.clientX; startScroll = rail.scrollLeft; rail.classList.add('dragging'); });
+window.addEventListener('pointermove', e => {
+  if (!isDown) return;
+  const dx = e.clientX - startX;
+  if (Math.abs(dx) > 6) dragged = true;
+  rail.scrollLeft = startScroll - dx;
+});
+window.addEventListener('pointerup', () => { isDown = false; rail.classList.remove('dragging'); setTimeout(() => dragged = false, 50); });
+
+/* ================= IDEA PAGE ================= */
+let watching = false, watchBase = 0;
+
+function openIdea(slug) {
+  const d = IDEAS[slug];
+
+  const band = document.getElementById('ideaBand');
+  band.style.background = d.bg;
+  band.style.color = d.ink;
+  document.getElementById('ideaMotif').innerHTML = MOTIFS[d.motif](d.accentDark);
+  document.getElementById('ideaType').textContent = d.type;
+  document.getElementById('ideaType').style.color = d.accentDark;
+  document.getElementById('ideaTitle').textContent = d.title;
+  document.getElementById('ideaTagline').textContent = d.tagline;
+
+  document.getElementById('ideaMetaStrip').innerHTML = `
+    <span class="mono">${d.hash} · ${d.updated}</span>
+    <span>${d.lineage}</span>
+    <span>Started ${d.started}</span>
+    <span>${d.commits.length} changes</span>`;
+
+  document.getElementById('ideaDesc').innerHTML = d.desc.map(p => `<p>${p}</p>`).join('');
+
+  document.getElementById('ideaDemos').innerHTML = d.demos.map(dm => `
+    <div class="demo-card" onclick="toast('Demo placeholder — embeds, video, or live links in the real build')">
+      <div style="height:96px; background:${d.bg}" class="flex items-center justify-center">
+        <div style="width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.75); display:flex; align-items:center; justify-content:center">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="${d.accentDark}"><polygon points="6 3 21 12 6 21"/></svg>
+        </div>
+      </div>
+      <div class="p-4">
+        <p class="text-sm font-semibold mb-0.5">${dm.label}</p>
+        <p class="t-meta">${dm.note}</p>
+      </div>
+    </div>`).join('') + `
+    <div class="demo-add" onclick="toast('Team members can attach demos: video, embeds, files, live links')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span class="text-sm font-medium">Add a demo</span>
+    </div>`;
+
+  document.getElementById('ideaCommits').innerHTML = d.commits.map(c => `
+    <div class="commit-row">
+      <span class="mono text-xs" style="color:${d.accentDark}">${c.hash}</span>
+      <div>
+        <p class="text-sm font-medium mb-0.5">${c.msg}</p>
+        <p class="t-meta">${c.meta}</p>
+      </div>
+      <span class="vpill">${c.tag}</span>
+    </div>`).join('');
+
+  document.getElementById('ideaStats').innerHTML = Object.entries(d.stats).map(([k, v]) => `
+    <div class="flex justify-between"><span style="color:var(--gray)">${k}</span><span class="font-semibold">${v}</span></div>`).join('') +
+    `<div class="flex justify-between"><span style="color:var(--gray)">Started</span><span class="font-semibold">${d.started}</span></div>`;
+
+  document.getElementById('ideaFiles').innerHTML = d.files.map(f => `
+    <div class="file-row">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      <span class="mono">${f}</span>
+    </div>`).join('');
+
+  document.getElementById('ideaTeam').innerHTML = d.team.map(m => `
+    <div class="flex items-center gap-3">
+      <div class="avatar" style="background:${m.color}">${m.init}</div>
+      <div><p class="text-sm font-semibold leading-tight">${m.name}</p><p class="t-meta">${m.role}</p></div>
+    </div>`).join('');
+
+  document.getElementById('ideaComments').innerHTML = d.comments.length ? d.comments.map(c => `
+    <div class="flex gap-3">
+      <div class="avatar" style="background:${c.color}">${c.init}</div>
+      <div><p class="text-sm"><span class="font-semibold">${c.name}</span> <span class="t-meta">· ${c.time}</span></p>
+      <p class="text-sm" style="color:var(--gray)">${c.text}</p></div>
+    </div>`).join('') : `<p class="t-meta">No discussion yet — be the first.</p>`;
+
+  watching = false; watchBase = d.stats.Watching;
+  document.getElementById('watchLabel').textContent = 'Watch · ' + watchBase;
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('on', b.dataset.p === 'overview'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'pane-overview'));
+
+  document.getElementById('view-home').classList.remove('active');
+  const v = document.getElementById('view-idea');
+  v.classList.remove('active'); void v.offsetWidth; v.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  document.getElementById('view-idea').classList.remove('active');
+  const v = document.getElementById('view-home');
+  v.classList.remove('active'); void v.offsetWidth; v.classList.add('active');
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => document.querySelectorAll('.rise').forEach(el => el.classList.add('in')));
+}
+
+function tab(btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + btn.dataset.p).classList.add('active');
+}
+
+function watch() {
+  watching = !watching;
+  document.getElementById('watchLabel').textContent = (watching ? 'Watching · ' : 'Watch · ') + (watchBase + (watching ? 1 : 0));
+}
+
+function addComment() {
+  const input = document.getElementById('commentInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const box = document.getElementById('ideaComments');
+  if (box.textContent.includes('No discussion yet')) box.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'flex gap-3';
+  div.innerHTML = `<div class="avatar" style="background:#161618">JA</div>
+    <div><p class="text-sm"><span class="font-semibold">Jamil</span> <span class="t-meta">· just now</span></p>
+    <p class="text-sm c-text" style="color:var(--gray)"></p></div>`;
+  div.querySelector('.c-text').textContent = text;
+  box.appendChild(div);
+  input.value = '';
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* nav border + hero rise on load */
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10), { passive: true });
+requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('.rise').forEach(el => el.classList.add('in')), 60));
+</script>
+</body>
+</html>

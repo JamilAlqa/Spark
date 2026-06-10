@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — prototype</title>
+<style>
+  :root {
+    --bg: #0c0e12;
+    --surface: #14171d;
+    --surface-2: #1a1e26;
+    --border: #262b35;
+    --text: #e8eaef;
+    --text-dim: #9aa3b2;
+    --text-faint: #646d7d;
+    --accent: #f59e0b;
+    --accent-soft: rgba(245, 158, 11, 0.12);
+    --green: #34d399;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  a { color: var(--blue); text-decoration: none; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 24px;
+    background: rgba(12,14,18,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; cursor: pointer; }
+  .logo .flame { color: var(--accent); font-size: 20px; }
+  .searchbar {
+    flex: 1; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 12px; color: var(--text-faint); font-size: 14px; cursor: text;
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .btn {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: var(--text-faint); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #18130a; font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+
+  /* ---------- layout ---------- */
+  .container { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- feed ---------- */
+  .feed-header { margin-bottom: 18px; }
+  .feed-header h1 { font-size: 20px; margin-bottom: 4px; }
+  .feed-header p { color: var(--text-dim); font-size: 14px; }
+  .chips { display: flex; gap: 8px; margin: 16px 0 20px; flex-wrap: wrap; }
+  .chip {
+    padding: 5px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); font-size: 13px; cursor: pointer; transition: all .15s;
+  }
+  .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; margin-bottom: 14px; cursor: pointer; transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: #3a4150; transform: translateY(-1px); }
+  .event-line { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 10px; flex-wrap: wrap; }
+  .event-icon { font-size: 14px; }
+  .event-line b { color: var(--text); font-weight: 600; }
+  .event-time { color: var(--text-faint); margin-left: auto; white-space: nowrap; }
+  .card h3 { font-size: 17px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; letter-spacing: .3px;
+  }
+  .badge.product { background: rgba(96,165,250,.13); color: var(--blue); }
+  .badge.research { background: rgba(52,211,153,.13); color: var(--green); }
+  .badge.concept { background: rgba(167,139,250,.13); color: var(--purple); }
+  .badge.conversation { background: rgba(244,114,182,.13); color: var(--pink); }
+  .card p.desc { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; }
+  .card-footer { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-faint); }
+  .avatars { display: flex; }
+  .avatars .avatar { width: 24px; height: 24px; font-size: 10px; border: 2px solid var(--surface); margin-left: -6px; }
+  .avatars .avatar:first-child { margin-left: 0; }
+  .stat { display: flex; align-items: center; gap: 4px; }
+
+  /* ---------- idea page ---------- */
+  .back { color: var(--text-dim); font-size: 14px; cursor: pointer; margin-bottom: 18px; display: inline-block; }
+  .back:hover { color: var(--text); }
+  .idea-head h1 { font-size: 26px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .idea-head .pitch { color: var(--text-dim); font-size: 16px; margin: 8px 0 14px; }
+  .idea-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--text-faint); margin-bottom: 16px; }
+  .lineage-tag { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; }
+  .idea-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 22px; overflow-x: auto; }
+  .tab {
+    padding: 9px 14px; font-size: 14px; color: var(--text-dim); cursor: pointer; border: none; background: none;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .pane { display: none; }
+  .pane.active { display: block; }
+  .pane h2 { font-size: 16px; margin: 22px 0 10px; }
+  .pane h2:first-child { margin-top: 0; }
+  .pane p { color: var(--text-dim); margin-bottom: 12px; }
+  .pane p strong { color: var(--text); }
+
+  .decision {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px; margin-bottom: 12px;
+  }
+  .decision .d-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+  .decision .d-title { font-weight: 600; font-size: 15px; }
+  .decision .d-time { color: var(--text-faint); font-size: 12px; white-space: nowrap; }
+  .decision .d-body { color: var(--text-dim); font-size: 14px; }
+  .decision .d-body b { color: var(--text); }
+
+  .trial { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 12px; }
+  .trial .t-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-weight: 600; }
+  .trial .t-status { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .t-status.done { background: rgba(52,211,153,.13); color: var(--green); }
+  .t-status.active { background: var(--accent-soft); color: var(--accent); }
+  .trial p { font-size: 14px; margin: 0; }
+
+  .filelist { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+  .file { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 14px; }
+  .file:last-child { border-bottom: none; }
+  .file .fname { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+  .file .fmeta { margin-left: auto; color: var(--text-faint); font-size: 12px; }
+  .bundle-note { background: var(--accent-soft); border: 1px solid rgba(245,158,11,.3); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--text-dim); margin-bottom: 14px; }
+  .bundle-note b { color: var(--accent); }
+
+  .member { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 10px; }
+  .member .m-name { font-weight: 600; }
+  .member .m-role { color: var(--text-faint); font-size: 13px; }
+  .open-role { border-style: dashed; cursor: pointer; color: var(--text-dim); }
+  .open-role:hover { border-color: var(--accent); color: var(--accent); }
+
+  .version { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .version:last-child { border-bottom: none; }
+  .version .v-tag { font-family: ui-monospace, Menlo, monospace; color: var(--accent); font-size: 13px; min-width: 42px; }
+  .version .v-desc { color: var(--text-dim); }
+  .version .v-time { margin-left: auto; color: var(--text-faint); font-size: 12px; white-space: nowrap; }
+  .hash { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--text-faint); }
+
+  .comment { display: flex; gap: 12px; margin-bottom: 16px; }
+  .comment .c-body { flex: 1; }
+  .comment .c-head { font-size: 13px; margin-bottom: 2px; }
+  .comment .c-head b { font-size: 14px; }
+  .comment .c-head span { color: var(--text-faint); }
+  .comment p { font-size: 14px; color: var(--text-dim); margin: 0; }
+  .comment-box { display: flex; gap: 12px; margin-top: 20px; }
+  .comment-box textarea {
+    flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; min-height: 44px;
+  }
+  .comment-box textarea:focus { outline: none; border-color: var(--accent); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+    padding: 9px 20px; font-size: 13px; color: var(--text-dim); transition: transform .25s; z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="show('feed')"><span class="flame">⚡</span>Spark</div>
+  <div class="searchbar" onclick="toast('Search — coming in the real build')">Search ideas, people, topics…</div>
+  <div class="nav-right">
+    <button class="btn primary" onclick="toast('New Spark: title + a paragraph. Structure grows later.')">+ New Spark</button>
+    <div class="avatar" style="background:#7c3aed">JA</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ================= FEED ================= -->
+  <div class="view active" id="view-feed">
+    <div class="feed-header">
+      <h1>What's moving</h1>
+      <p>Ideas surface when something happens — a trial, a decision, a fork, a new builder. No launches, no leaderboards.</p>
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip on" data-f="all">All</button>
+      <button class="chip" data-f="product">Products</button>
+      <button class="chip" data-f="research">Research</button>
+      <button class="chip" data-f="concept">Concepts</button>
+      <button class="chip" data-f="conversation">Conversations</button>
+    </div>
+
+    <div class="card" data-type="concept" onclick="show('idea')">
+      <div class="event-line"><span class="event-icon">🔀</span><b>Jamil</b> merged a decision into the log <span class="event-time">2h ago</span></div>
+      <h3>Spark <span class="badge concept">CONCEPT</span></h3>
+      <p class="desc">The public record for ideas. Idea pages with versioned history, executable context bundles, and forking with lineage — credit, not exclusivity.</p>
+      <div class="card-footer">
+        <div class="avatars"><div class="avatar" style="background:#7c3aed">JA</div><div class="avatar" style="background:#d97706">CL</div></div>
+        <span class="stat">🔱 0 forks</span><span class="stat">👁 12 watching</span><span class="stat">💬 4</span><span class="stat">v0.4</span>
+      </div>
+    </div>
+
+    <div class="card" data-type="research" onclick="toast('Sample card — only the Spark page is built out in this prototype')">
+      <div class="event-line"><span class="event-icon">🧪</span><b>Mira K.</b> posted trial results: Batch 3 compression test <span class="event-time">5h ago</span></div>
+      <h3>Mycelium Packaging <span class="badge research">RESEARCH</span></h3>
+      <p class="desc">Growing compostable shipping foam from agricultural waste. Open methods, open failures.</p>
+      <div class="card-footer">
+        <div class="avatars"><div class="avatar" style="background:#059669">MK</div><div class="avatar" style="background:#2563eb">TS</div><div class="avatar" style="background:#dc2626">RN</div></div>
+        <span class="stat">🔱 3 forks</span><span class="stat">👁 89 watching</span><span class="stat">💬 31</span>
+      </div>
+    </div>
+
+    <div class="card" data-type="product" onclick="toast('Sample card — only the Spark page is built out in this prototype')">
+      <div class="event-line"><span class="event-icon">🌱</span><b>Dev A.</b> forked this from <b>Socratic LLM Tutoring</b> <span class="event-time">8h ago</span></div>
+      <h3>Atlas — a tutor that asks first <span class="badge product">PRODUCT</span></h3>
+      <p class="desc">Forked the original concept's context bundle, swapped the roadmap toward K-12. Lineage credited on both pages.</p>
+      <div class="card-footer">
+        <div class="avatars"><div class="avatar" style="background:#0891b2">DA</div></div>
+        <span class="stat">🔱 from parent</span><span class="stat">👁 14 watching</span><span class="stat">💬 6</span>
+      </div>
+    </div>
+
+    <div class="card" data-type="concept" onclick="toast('Sample card — only the Spark page is built out in this prototype')">
+      <div class="event-line"><span class="event-icon">🤝</span><b>Third Place</b> opened 2 roles: architect, community lead <span class="event-time">1d ago</span></div>
+      <h3>Third Place — a non-commercial café <span class="badge concept">CONCEPT</span></h3>
+      <p class="desc">A neighborhood space with no purchase required. Decision log covers zoning, funding models tried, and why membership failed.</p>
+      <div class="card-footer">
+        <div class="avatars"><div class="avatar" style="background:#be185d">LH</div><div class="avatar" style="background:#4f46e5">OG</div></div>
+        <span class="stat">🔱 1 fork</span><span class="stat">👁 203 watching</span><span class="stat">💬 58</span>
+      </div>
+    </div>
+
+    <div class="card" data-type="conversation" onclick="toast('Sample card — only the Spark page is built out in this prototype')">
+      <div class="event-line"><span class="event-icon">💬</span><b>74 people</b> contributed this week <span class="event-time">2d ago</span></div>
+      <h3>Should model weights count as authorship? <span class="badge conversation">CONVERSATION</span></h3>
+      <p class="desc">An open conversation page. The best-argued positions get merged into a living summary, with every contributor credited.</p>
+      <div class="card-footer">
+        <div class="avatars"><div class="avatar" style="background:#7c3aed">+</div></div>
+        <span class="stat">👁 412 watching</span><span class="stat">💬 174</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= IDEA PAGE ================= -->
+  <div class="view" id="view-idea">
+    <span class="back" onclick="show('feed')">← Back to feed</span>
+    <div class="idea-head">
+      <h1>⚡ Spark <span class="badge concept">CONCEPT</span></h1>
+      <p class="pitch">The public record for ideas — a place to show what you're building, who with, and how. Sharing first is proof of priority, not exposure to theft.</p>
+      <div class="idea-meta">
+        <span class="lineage-tag">🌳 Original — no parent · 0 forks</span>
+        <span>Started Jun 10, 2026</span>
+        <span class="hash">latest: a3f2c91 · timestamped 14:02 UTC</span>
+      </div>
+      <div class="idea-actions">
+        <button class="btn primary" onclick="toast('Fork: clones the context bundle, links lineage to this page')">🔱 Fork this idea</button>
+        <button class="btn" id="watchBtn" onclick="watch()">👁 Watch · 12</button>
+        <button class="btn" onclick="toast('Downloads the bundle — open it in Claude Code and start executing')">⬇ Clone bundle</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-p="overview">Overview</button>
+      <button class="tab" data-p="decisions">Decision Log <span style="color:var(--text-faint)">6</span></button>
+      <button class="tab" data-p="trials">Trials <span style="color:var(--text-faint)">3</span></button>
+      <button class="tab" data-p="bundle">Context Bundle</button>
+      <button class="tab" data-p="team">Team</button>
+      <button class="tab" data-p="history">History</button>
+      <button class="tab" data-p="discussion">Discussion <span style="color:var(--text-faint)">4</span></button>
+    </div>
+
+    <!-- overview -->
+    <div class="pane active" id="pane-overview">
+      <h2>The problem</h2>
+      <p>People sit on ideas because sharing feels risky, and the thinking behind projects — the orchestration — lives on whiteboards and scattered docs with no public, versioned home. GitHub holds the artifacts; nobody holds the thinking.</p>
+      <h2>The idea</h2>
+      <p>Every idea gets a living page: pitch, story, trials, team, decision log, and a versioned, timestamped history. Publishing openly becomes your receipt. Forks must carry lineage, so attribution is structural. <strong>Credit, not exclusivity</strong> — multiple people can run at the same idea; the surrounding environment (team, activity, progress) is what differentiates.</p>
+      <h2>Why now</h2>
+      <p>AI is making code the commodity output of ideas. The scarce upstream artifact is intent: prompts, instruction files, roadmaps, decisions. A Spark page packages that as an executable context bundle — fork it, clone it into an agent, and instantiate the project.</p>
+    </div>
+
+    <!-- decisions -->
+    <div class="pane" id="pane-decisions">
+      <div class="decision">
+        <div class="d-head"><span class="d-title">Idea-centric pages, not person-centric profiles</span><span class="d-time">Jun 10 · 11:14</span></div>
+        <div class="d-body"><b>Over:</b> portfolio/profile model (Peerlist, WIP). <b>Because:</b> the idea is the first-class object; profiles are derived from the attribution graph.</div>
+      </div>
+      <div class="decision">
+        <div class="d-head"><span class="d-title">Credit, not exclusivity</span><span class="d-time">Jun 10 · 11:52</span></div>
+        <div class="d-body"><b>Over:</b> priority-weighting to prevent idea-squatting. <b>Because:</b> you can only claim an idea as far as legally applicable. Execution differentiates; a page with no activity is just a timestamp the feed never surfaces.</div>
+      </div>
+      <div class="decision">
+        <div class="d-head"><span class="d-title">Provenance spine, social skin</span><span class="d-time">Jun 10 · 12:31</span></div>
+        <div class="d-body"><b>Over:</b> pure social-feed architecture. <b>Because:</b> feeds reward hot takes and bury ideas; the versioned page is the spine, the feed shows events <i>from</i> pages so social energy flows back into the durable artifact.</div>
+      </div>
+      <div class="decision">
+        <div class="d-head"><span class="d-title">Context bundles make ideas executable</span><span class="d-time">Jun 10 · 13:20</span></div>
+        <div class="d-body"><b>Over:</b> prose-only idea pages. <b>Because:</b> prompts, instruction files, and roadmaps diff and merge like code — and an agent can execute them. The page is a recipe, not a photo of the food.</div>
+      </div>
+      <div class="decision">
+        <div class="d-head"><span class="d-title">The orchestration layer is the product</span><span class="d-time">Jun 10 · 13:48</span></div>
+        <div class="d-body"><b>Over:</b> positioning as a code-adjacent tool. <b>Because:</b> every idea — restaurant, research program, documentary — has an orchestration layer. Code was one execution medium among many. Codebases are the commodity output.</div>
+      </div>
+      <div class="decision">
+        <div class="d-head"><span class="d-title">Activity-based feed, no upvotes</span><span class="d-time">Jun 10 · 11:30</span></div>
+        <div class="d-body"><b>Over:</b> Product Hunt-style trending. <b>Because:</b> leaderboards create launch-moment dynamics; surfacing progress rewards the behavior Spark exists to encourage.</div>
+      </div>
+    </div>
+
+    <!-- trials -->
+    <div class="pane" id="pane-trials">
+      <div class="trial">
+        <div class="t-head">Competitive landscape scan <span class="t-status done">DONE</span></div>
+        <p>Mapped Product Hunt, WIP.co, Indie Hackers, Peerlist, ResearchHub. Result: nobody combines idea-centric pages + non-product scope + social feel. Gap confirmed.</p>
+      </div>
+      <div class="trial">
+        <div class="t-head">Concept framework v0.1–v0.4 <span class="t-status done">DONE</span></div>
+        <p>Written framework covering thesis, core objects, interactions, attribution system, MVP scope. Survived four revision rounds; squatting concern resolved into the credit-not-exclusivity principle.</p>
+      </div>
+      <div class="trial">
+        <div class="t-head">Sample page prototype <span class="t-status active">ACTIVE</span></div>
+        <p>This page. Testing whether the anatomy (decision log, bundle, trials, lineage) feels like a living home for an idea — using Spark's own ideation process as the content.</p>
+      </div>
+    </div>
+
+    <!-- bundle -->
+    <div class="pane" id="pane-bundle">
+      <div class="bundle-note"><b>Executable.</b> Clone this bundle into Claude Code (or any agent) to instantiate the project from its current state. Forks inherit the bundle with lineage attached.</div>
+      <div class="filelist">
+        <div class="file">📄 <span class="fname">vision.md</span><span class="fmeta">2.1 KB · v0.4 · 2h ago</span></div>
+        <div class="file">📄 <span class="fname">spark-concept.md</span><span class="fmeta">8.4 KB · v0.4 · 2h ago</span></div>
+        <div class="file">📄 <span class="fname">roadmap.md</span><span class="fmeta">1.3 KB · v0.2 · 3h ago</span></div>
+        <div class="file">📄 <span class="fname">CLAUDE.md</span><span class="fmeta">0.9 KB · v0.1 · 3h ago</span></div>
+        <div class="file">📁 <span class="fname">prompts/</span><span class="fmeta">3 files</span></div>
+        <div class="file">📁 <span class="fname">decisions/</span><span class="fmeta">6 entries · auto-synced from log</span></div>
+      </div>
+      <p style="color:var(--text-faint);font-size:13px">Contributions arrive as diffs on these files — review and merge them like pull requests. Accepted contributions are permanently credited.</p>
+    </div>
+
+    <!-- team -->
+    <div class="pane" id="pane-team">
+      <div class="member"><div class="avatar" style="background:#7c3aed">JA</div><div><div class="m-name">Jamil</div><div class="m-role">Originator · vision, decisions</div></div></div>
+      <div class="member"><div class="avatar" style="background:#d97706">CL</div><div><div class="m-name">Claude</div><div class="m-role">Collaborator · research, framework drafting, prototype</div></div></div>
+      <div class="member open-role" onclick="toast('Open roles: apply with a contribution, not a resume')"><div class="avatar" style="background:var(--surface-2);color:var(--text-faint);border:1px dashed var(--border)">+</div><div><div class="m-name">Open role — design</div><div class="m-role">Help define the visual language of idea pages</div></div></div>
+    </div>
+
+    <!-- history -->
+    <div class="pane" id="pane-history">
+      <div class="version"><span class="v-tag">v0.4</span><span class="v-desc">Orchestration-layer thesis; decision log promoted to first-class element</span><span class="v-time">2h ago · <span class="hash">a3f2c91</span></span></div>
+      <div class="version"><span class="v-tag">v0.3</span><span class="v-desc">Context bundles — ideas as executable artifacts; merging mechanics defined</span><span class="v-time">3h ago · <span class="hash">8be04d2</span></span></div>
+      <div class="version"><span class="v-tag">v0.2</span><span class="v-desc">Credit-not-exclusivity principle; squatting question resolved and removed</span><span class="v-time">3h ago · <span class="hash">5c17aa8</span></span></div>
+      <div class="version"><span class="v-tag">v0.1</span><span class="v-desc">Initial framework: vision, core objects, interactions, MVP scope</span><span class="v-time">4h ago · <span class="hash">e90b3f4</span></span></div>
+      <p style="color:var(--text-faint);font-size:13px;margin-top:14px">Every version is hashed and timestamped at publish. History is public and immutable — this is the provenance layer.</p>
+    </div>
+
+    <!-- discussion -->
+    <div class="pane" id="pane-discussion">
+      <div class="comment"><div class="avatar" style="background:#0891b2">DA</div><div class="c-body"><div class="c-head"><b>Dev A.</b> <span>· 1h ago</span></div><p>The clone-bundle flow is the hook for me. Forked Socratic Tutoring last week and had a running variant the same day.</p></div></div>
+      <div class="comment"><div class="avatar" style="background:#059669">MK</div><div class="c-body"><div class="c-head"><b>Mira K.</b> <span>· 2h ago</span></div><p>Will research pages support data attachments in trials? Our compression results are CSVs.</p></div></div>
+      <div class="comment"><div class="avatar" style="background:#be185d">LH</div><div class="c-body"><div class="c-head"><b>Lena H.</b> <span>· 2h ago</span></div><p>Appreciate that non-tech ideas aren't second-class here. The decision log maps perfectly to how we documented our zoning saga.</p></div></div>
+      <div class="comment"><div class="avatar" style="background:#4f46e5">OG</div><div class="c-body"><div class="c-head"><b>Omar G.</b> <span>· 3h ago</span></div><p>Suggestion → submitted as a diff on roadmap.md instead. Felt right.</p></div></div>
+      <div class="comment-box">
+        <div class="avatar" style="background:#7c3aed">JA</div>
+        <textarea id="commentInput" placeholder="Add to the discussion — or propose a change to the bundle…"></textarea>
+        <button class="btn primary" onclick="addComment()">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function show(v) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + v).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // feed filters
+  document.getElementById('chips').addEventListener('click', e => {
+    if (!e.target.dataset.f) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    e.target.classList.add('on');
+    const f = e.target.dataset.f;
+    document.querySelectorAll('#view-feed .card').forEach(c => {
+      c.style.display = (f === 'all' || c.dataset.type === f) ? '' : 'none';
+    });
+  });
+
+  // idea page tabs
+  document.getElementById('tabs').addEventListener('click', e => {
+    const t = e.target.closest('.tab');
+    if (!t) return;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + t.dataset.p).classList.add('active');
+  });
+
+  let watching = false, watchCount = 12;
+  function watch() {
+    watching = !watching;
+    watchCount += watching ? 1 : -1;
+    document.getElementById('watchBtn').textContent = (watching ? '✓ Watching · ' : '👁 Watch · ') + watchCount;
+  }
+
+  function addComment() {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = '<div class="avatar" style="background:#7c3aed">JA</div><div class="c-body"><div class="c-head"><b>Jamil</b> <span>· just now</span></div><p></p></div>';
+    div.querySelector('p').textContent = text;
+    document.querySelector('.comment-box').before(div);
+    input.value = '';
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+</script>
+</body>
+</html>
