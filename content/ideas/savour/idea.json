@@ -3,7 +3,11 @@
   "title": "Savour",
   "type": "Product",
   "motif": "steam",
-  "palette": { "bg": "#FFF0C2", "accent": "#9A6B00", "ink": "#3C2A00" },
+  "palette": {
+    "bg": "#FFF0C2",
+    "accent": "#9A6B00",
+    "ink": "#3C2A00"
+  },
   "tagline": "A slower way to keep the meals worth remembering.",
   "blurb": "Memory over ratings — a considered log for food experiences.",
   "hash": "b29c771",
@@ -16,11 +20,24 @@
   ],
   "demos": [],
   "commits": [
-    { "hash": "b29c771", "tag": "v0.1", "msg": "Initial concept and direction", "meta": "Jamil · 1w ago" }
+    {
+      "hash": "b29c771",
+      "tag": "v0.1",
+      "msg": "Initial concept and direction",
+      "meta": "Jamil · 1w ago"
+    }
   ],
-  "files": ["vision.md", "roadmap.md"],
-  "stats": { "watching": 5, "forks": 0, "contributors": 1 },
+  "stats": {
+    "watching": 5,
+    "forks": 0,
+    "contributors": 1
+  },
   "team": [
-    { "init": "JA", "color": "#161618", "name": "Jamil", "role": "Originator" }
+    {
+      "init": "JA",
+      "color": "#161618",
+      "name": "Jamil",
+      "role": "Originator"
+    }
   ]
 }

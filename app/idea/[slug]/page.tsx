@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import Motif from "@/components/Motif";
 import IdeaTabs from "@/components/IdeaTabs";
 import { getIdea, getIdeas } from "@/lib/ideas";
+import { getBundle, countBundleFiles } from "@/lib/bundle";
+import { getRepoActivity, repoName } from "@/lib/repo";
+import type { BundleNode } from "@/types/idea";
 
 export function generateStaticParams() {
   return getIdeas().map((i) => ({ slug: i.slug }));
@@ -13,9 +16,15 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   return { title: idea ? `${idea.title} — Spark` : "Spark" };
 }
 
-export default function IdeaPage({ params }: { params: { slug: string } }) {
+export default async function IdeaPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const idea = getIdea(params.slug);
   if (!idea) notFound();
+  const bundle = getBundle(params.slug);
+  const codeCommits = await getRepoActivity(idea.repo);
 
   return (
     <main className="max-w-5xl mx-auto px-6 pt-10 pb-24">
@@ -73,7 +82,7 @@ export default function IdeaPage({ params }: { params: { slug: string } }) {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_280px] gap-14">
-        <IdeaTabs idea={idea} />
+        <IdeaTabs idea={idea} bundle={bundle} codeCommits={codeCommits} />
 
         {/* side rail */}
         <aside>
@@ -86,24 +95,56 @@ export default function IdeaPage({ params }: { params: { slug: string } }) {
               <Stat k="Started" v={idea.started} />
             </div>
           </div>
-          <div className="side-block">
-            <p className="t-label mb-3 text-faint">Context bundle</p>
-            <div>
-              {idea.files.map((f) => (
-                <div key={f} className="flex items-center gap-2.5 py-1.5 text-[13px] text-gray2">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                    <polyline points="13 2 13 9 20 9" />
-                  </svg>
-                  <span className="mono">{f}</span>
-                </div>
-              ))}
+          {bundle && (
+            <div className="side-block">
+              <p className="t-label mb-3 text-faint">
+                Context bundle · {countBundleFiles(bundle)} files
+              </p>
+              <div>
+                {bundle.tree.map((n) => (
+                  <BundleEntry key={n.path} node={n} />
+                ))}
+              </div>
+              <p className="t-meta mt-3">
+                Contributions arrive as diffs on these files — merged like pull
+                requests, credited forever.
+              </p>
             </div>
-            <p className="t-meta mt-3">
-              Contributions arrive as diffs on these files — merged like pull
-              requests, credited forever.
-            </p>
-          </div>
+          )}
+          {idea.repo && (
+            <div className="side-block">
+              <p className="t-label mb-3 text-faint">Repository</p>
+              <a
+                href={idea.repo.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2.5 py-1.5 text-[13px] text-gray2 hover:text-ink transition-colors"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="6" y1="3" x2="6" y2="15" />
+                  <circle cx="18" cy="6" r="3" />
+                  <circle cx="6" cy="18" r="3" />
+                  <path d="M18 9a9 9 0 0 1-9 9" />
+                </svg>
+                <span className="mono">{repoName(idea.repo)}</span>
+                {idea.repo.branch && (
+                  <span className="vpill ml-auto">{idea.repo.branch}</span>
+                )}
+              </a>
+              {codeCommits && codeCommits.length > 0 && (
+                <p className="t-meta mt-1">
+                  Last commit {codeCommits[0].when} ·{" "}
+                  {codeCommits[0].msg.length > 40
+                    ? codeCommits[0].msg.slice(0, 40) + "…"
+                    : codeCommits[0].msg}
+                </p>
+              )}
+              <p className="t-meta mt-3">
+                This page holds the intent layer; the repository holds the
+                build. Code activity appears under Changes.
+              </p>
+            </div>
+          )}
           <div className="side-block">
             <p className="t-label mb-4 text-faint">Team</p>
             <div className="space-y-3.5">
@@ -124,6 +165,36 @@ export default function IdeaPage({ params }: { params: { slug: string } }) {
       </div>
     </main>
   );
+}
+
+function BundleEntry({ node }: { node: BundleNode }) {
+  const isDir = node.kind === "dir";
+  return (
+    <div className="flex items-center gap-2.5 py-1.5 text-[13px] text-gray2">
+      {isDir ? (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      ) : (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+          <polyline points="13 2 13 9 20 9" />
+        </svg>
+      )}
+      <span className="mono">
+        {node.name}
+        {isDir ? "/" : ""}
+      </span>
+      {isDir && (
+        <span className="t-meta ml-auto">{countNodes(node)}</span>
+      )}
+    </div>
+  );
+}
+
+function countNodes(node: BundleNode): number {
+  if (node.kind === "file") return 1;
+  return (node.children ?? []).reduce((sum, c) => sum + countNodes(c), 0);
 }
 
 function Stat({ k, v }: { k: string; v: string | number }) {

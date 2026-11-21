@@ -3,32 +3,80 @@
   "title": "Spark",
   "type": "Concept",
   "motif": "bolt",
-  "palette": { "bg": "#FFE3D3", "accent": "#B33B12", "ink": "#3A1505" },
+  "palette": {
+    "bg": "#FFE3D3",
+    "accent": "#B33B12",
+    "ink": "#3A1505"
+  },
   "tagline": "The public record for ideas — show what you're building, who with, and how.",
   "blurb": "Versioned idea pages, executable context bundles, forks that carry lineage.",
   "hash": "a3f2c91",
   "updated": "2h ago",
   "started": "Jun 10, 2026",
   "lineage": "Original · 0 forks",
+  "repo": {
+    "url": "https://github.com/jalqa/spark",
+    "branch": "master",
+    "local": true
+  },
   "desc": [
     "People sit on ideas because sharing feels risky, and the thinking behind projects — the orchestration — lives on whiteboards and scattered docs with no public, versioned home. GitHub holds the artifacts; nobody holds the thinking.",
     "Spark gives every idea a living page: description, demos, trials, team, and a decision log with timestamped, immutable history. Publishing openly becomes your receipt. Forks must carry lineage, so attribution is structural.",
     "Why now: AI is making code the commodity output of ideas. The scarce upstream artifact is intent — prompts, instruction files, roadmaps, decisions. A Spark page packages that as an executable context bundle: fork it, clone it into an agent, and instantiate the project."
   ],
   "demos": [
-    { "label": "Prototype v1 — feed & idea page", "note": "Interactive walkthrough" },
-    { "label": "Concept framework v0.4", "note": "spark-concept.md · living document" }
+    {
+      "label": "Prototype v1 — feed & idea page",
+      "note": "Interactive walkthrough"
+    },
+    {
+      "label": "Concept framework v0.4",
+      "note": "spark-concept.md · living document"
+    }
   ],
   "commits": [
-    { "hash": "a3f2c91", "tag": "v0.4", "msg": "Decision log promoted to first-class element; orchestration-layer thesis", "meta": "Jamil · 2h ago" },
-    { "hash": "8be04d2", "tag": "v0.3", "msg": "Context bundles: ideas as executable artifacts", "meta": "Jamil · 3h ago" },
-    { "hash": "5c17aa8", "tag": "v0.2", "msg": "Credit-not-exclusivity principle; squatting concern resolved", "meta": "Jamil · 3h ago" },
-    { "hash": "e90b3f4", "tag": "v0.1", "msg": "Initial framework: vision, core objects, interactions, MVP scope", "meta": "Jamil · 4h ago" }
+    {
+      "hash": "a3f2c91",
+      "tag": "v0.4",
+      "msg": "Decision log promoted to first-class element; orchestration-layer thesis",
+      "meta": "Jamil · 2h ago"
+    },
+    {
+      "hash": "8be04d2",
+      "tag": "v0.3",
+      "msg": "Context bundles: ideas as executable artifacts",
+      "meta": "Jamil · 3h ago"
+    },
+    {
+      "hash": "5c17aa8",
+      "tag": "v0.2",
+      "msg": "Credit-not-exclusivity principle; squatting concern resolved",
+      "meta": "Jamil · 3h ago"
+    },
+    {
+      "hash": "e90b3f4",
+      "tag": "v0.1",
+      "msg": "Initial framework: vision, core objects, interactions, MVP scope",
+      "meta": "Jamil · 4h ago"
+    }
   ],
-  "files": ["vision.md", "spark-concept.md", "roadmap.md", "CLAUDE.md", "prompts/", "decisions/"],
-  "stats": { "watching": 12, "forks": 0, "contributors": 2 },
+  "stats": {
+    "watching": 12,
+    "forks": 0,
+    "contributors": 2
+  },
   "team": [
-    { "init": "JA", "color": "#161618", "name": "Jamil", "role": "Originator · vision, decisions" },
-    { "init": "CL", "color": "#B33B12", "name": "Claude", "role": "Collaborator · research, prototypes" }
+    {
+      "init": "JA",
+      "color": "#161618",
+      "name": "Jamil",
+      "role": "Originator · vision, decisions"
+    },
+    {
+      "init": "CL",
+      "color": "#B33B12",
+      "name": "Claude",
+      "role": "Collaborator · research, prototypes"
+    }
   ]
 }

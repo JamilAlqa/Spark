@@ -36,6 +36,42 @@ export interface TeamMember {
   role: string;
 }
 
+/** Link from a Spark page (intent layer) to its repo (execution layer). */
+export interface RepoLink {
+  /** GitHub URL, e.g. https://github.com/user/project */
+  url: string;
+  branch?: string;
+  /** read commit activity from this working copy instead of the GitHub API
+   *  (for the idea whose repo IS this codebase) */
+  local?: boolean;
+}
+
+/** A commit pulled from the linked repository. */
+export interface CodeCommit {
+  hash: string;
+  msg: string;
+  author: string;
+  /** relative time, e.g. "3h ago" */
+  when: string;
+  url: string;
+}
+
+/** A node in an idea's context bundle — the standard directory layout:
+ *  README.md, concept/, orchestration/, execution/, agents/ */
+export interface BundleNode {
+  name: string;
+  /** path relative to the bundle root, e.g. "concept/vision.md" */
+  path: string;
+  kind: "dir" | "file";
+  children?: BundleNode[];
+}
+
+export interface Bundle {
+  tree: BundleNode[];
+  /** raw markdown, keyed by bundle-relative path */
+  files: Record<string, string>;
+}
+
 export interface Idea {
   slug: string;
   order: number;
@@ -52,7 +88,7 @@ export interface Idea {
   desc: string[];
   demos: Demo[];
   commits: Commit[];
-  files: string[];
+  repo?: RepoLink;
   stats: { watching: number; forks: number; contributors: number };
   team: TeamMember[];
 }

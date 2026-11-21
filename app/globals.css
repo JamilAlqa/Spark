@@ -275,6 +275,128 @@ body {
   color: var(--ink);
 }
 
+/* ---------- bundle browser ---------- */
+.bundle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 13px;
+  color: var(--faint);
+  text-align: left;
+}
+.bundle-row svg {
+  flex-shrink: 0;
+}
+.bundle-row.file {
+  color: var(--gray);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.15s;
+}
+.bundle-row.file:hover {
+  color: var(--ink);
+}
+.bundle-row.file.on {
+  font-weight: 650;
+}
+
+/* rendered markdown — stays inside the locked type scale */
+.doc {
+  max-width: 600px;
+}
+.doc h1 {
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+.doc h2 {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 26px 0 10px;
+}
+.doc h3 {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 20px 0 8px;
+}
+.doc p {
+  font-size: 15px;
+  color: var(--gray);
+  margin-bottom: 14px;
+}
+.doc ul,
+.doc ol {
+  font-size: 15px;
+  color: var(--gray);
+  margin: 0 0 14px 4px;
+  padding-left: 18px;
+}
+.doc ul {
+  list-style: disc;
+}
+.doc ol {
+  list-style: decimal;
+}
+.doc li {
+  margin-bottom: 5px;
+}
+.doc strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+.doc code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+.doc pre {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+.doc pre code {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.doc blockquote {
+  border-left: 2px solid var(--line);
+  padding-left: 16px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: var(--gray);
+  font-style: italic;
+}
+.doc hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 22px 0;
+}
+.doc a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line);
+}
+.doc a:hover {
+  text-decoration-color: var(--ink);
+}
+
 .side-block {
   border-top: 1px solid var(--line);
   padding: 20px 0;

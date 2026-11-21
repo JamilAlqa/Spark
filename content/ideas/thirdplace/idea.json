@@ -3,7 +3,11 @@
   "title": "Third Place",
   "type": "Concept",
   "motif": "arch",
-  "palette": { "bg": "#EBDFFC", "accent": "#6D28D9", "ink": "#241048" },
+  "palette": {
+    "bg": "#EBDFFC",
+    "accent": "#6D28D9",
+    "ink": "#241048"
+  },
   "tagline": "A neighborhood café with no purchase required.",
   "blurb": "Zoning sagas, funding trials, and an honest membership post-mortem.",
   "hash": "62f0ab4",
@@ -15,16 +19,42 @@
     "The page's value is the orchestration record: three funding models tried, the zoning saga documented decision by decision, and an honest post-mortem on the membership experiment."
   ],
   "demos": [
-    { "label": "Funding model comparison", "note": "Three trials · one survivor" }
+    {
+      "label": "Funding model comparison",
+      "note": "Three trials · one survivor"
+    }
   ],
   "commits": [
-    { "hash": "62f0ab4", "tag": "team", "msg": "Opened 2 roles: architect, community lead", "meta": "Lena H. · 1d ago" },
-    { "hash": "e3c77d1", "tag": "decision", "msg": "Drop membership model — creates the exclusion we exist to remove", "meta": "Lena H. · 1w ago" }
+    {
+      "hash": "62f0ab4",
+      "tag": "team",
+      "msg": "Opened 2 roles: architect, community lead",
+      "meta": "Lena H. · 1d ago"
+    },
+    {
+      "hash": "e3c77d1",
+      "tag": "decision",
+      "msg": "Drop membership model — creates the exclusion we exist to remove",
+      "meta": "Lena H. · 1w ago"
+    }
   ],
-  "files": ["vision.md", "funding-models.md", "zoning-log.md", "decisions/"],
-  "stats": { "watching": 203, "forks": 1, "contributors": 4 },
+  "stats": {
+    "watching": 203,
+    "forks": 1,
+    "contributors": 4
+  },
   "team": [
-    { "init": "LH", "color": "#6D28D9", "name": "Lena H.", "role": "Originator" },
-    { "init": "OG", "color": "#161618", "name": "Omar G.", "role": "Contributor · finance" }
+    {
+      "init": "LH",
+      "color": "#6D28D9",
+      "name": "Lena H.",
+      "role": "Originator"
+    },
+    {
+      "init": "OG",
+      "color": "#161618",
+      "name": "Omar G.",
+      "role": "Contributor · finance"
+    }
   ]
 }

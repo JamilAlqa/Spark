@@ -3,7 +3,11 @@
   "title": "Mycelium Packaging",
   "type": "Research",
   "motif": "network",
-  "palette": { "bg": "#DCF2DF", "accent": "#15803D", "ink": "#0A2E16" },
+  "palette": {
+    "bg": "#DCF2DF",
+    "accent": "#15803D",
+    "ink": "#0A2E16"
+  },
   "tagline": "Growing compostable shipping foam from agricultural waste.",
   "blurb": "Open methods, open failures — every batch published as a trial.",
   "hash": "d83e1f0",
@@ -15,18 +19,52 @@
     "Every batch — including the failures — is published as a trial with method and data attached. Three labs have forked the protocol to test regional substrates; lineage keeps the results comparable."
   ],
   "demos": [
-    { "label": "Batch 3 — compression test", "note": "Trial data · CSV + method" },
-    { "label": "Growth timelapse", "note": "14 days · substrate B" }
+    {
+      "label": "Batch 3 — compression test",
+      "note": "Trial data · CSV + method"
+    },
+    {
+      "label": "Growth timelapse",
+      "note": "14 days · substrate B"
+    }
   ],
   "commits": [
-    { "hash": "d83e1f0", "tag": "trial", "msg": "Batch 3 compression results: 2.1 PSI at 40% strain", "meta": "Mira K. · 5h ago" },
-    { "hash": "97aa3c2", "tag": "merge", "msg": "Merged: substrate prep revision from fork (rice hull blend)", "meta": "T. Singh · 2d ago" },
-    { "hash": "41b8e09", "tag": "v1.0", "msg": "Protocol v1: substrate, inoculation, drying schedule", "meta": "Mira K. · 3w ago" }
+    {
+      "hash": "d83e1f0",
+      "tag": "trial",
+      "msg": "Batch 3 compression results: 2.1 PSI at 40% strain",
+      "meta": "Mira K. · 5h ago"
+    },
+    {
+      "hash": "97aa3c2",
+      "tag": "merge",
+      "msg": "Merged: substrate prep revision from fork (rice hull blend)",
+      "meta": "T. Singh · 2d ago"
+    },
+    {
+      "hash": "41b8e09",
+      "tag": "v1.0",
+      "msg": "Protocol v1: substrate, inoculation, drying schedule",
+      "meta": "Mira K. · 3w ago"
+    }
   ],
-  "files": ["protocol.md", "trials/", "data/", "open-questions.md"],
-  "stats": { "watching": 89, "forks": 3, "contributors": 5 },
+  "stats": {
+    "watching": 89,
+    "forks": 3,
+    "contributors": 5
+  },
   "team": [
-    { "init": "MK", "color": "#15803D", "name": "Mira K.", "role": "Originator · mycology" },
-    { "init": "TS", "color": "#2D5BFF", "name": "T. Singh", "role": "Contributor · materials" }
+    {
+      "init": "MK",
+      "color": "#15803D",
+      "name": "Mira K.",
+      "role": "Originator · mycology"
+    },
+    {
+      "init": "TS",
+      "color": "#2D5BFF",
+      "name": "T. Singh",
+      "role": "Contributor · materials"
+    }
   ]
 }

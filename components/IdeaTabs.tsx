@@ -1,15 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import type { Idea } from "@/types/idea";
+import type { Bundle, CodeCommit, Idea } from "@/types/idea";
+import BundleBrowser from "@/components/BundleBrowser";
 
-type PaneId = "overview" | "changes" | "discussion";
+type PaneId = "overview" | "bundle" | "changes" | "discussion";
 
-export default function IdeaTabs({ idea }: { idea: Idea }) {
+export default function IdeaTabs({
+  idea,
+  bundle,
+  codeCommits,
+}: {
+  idea: Idea;
+  bundle: Bundle | null;
+  codeCommits: CodeCommit[] | null;
+}) {
   const [pane, setPane] = useState<PaneId>("overview");
 
   const tabs: { id: PaneId; label: string }[] = [
     { id: "overview", label: "Overview" },
+    ...(bundle ? [{ id: "bundle" as const, label: "Bundle" }] : []),
     { id: "changes", label: "Changes" },
     { id: "discussion", label: "Discussion" },
   ];
@@ -66,6 +76,10 @@ export default function IdeaTabs({ idea }: { idea: Idea }) {
         </div>
       )}
 
+      {pane === "bundle" && bundle && (
+        <BundleBrowser bundle={bundle} palette={idea.palette} />
+      )}
+
       {pane === "changes" && (
         <div>
           {idea.commits.map((c) => (
@@ -84,6 +98,37 @@ export default function IdeaTabs({ idea }: { idea: Idea }) {
             Every change is hashed and timestamped at publish. History is public
             and immutable.
           </p>
+
+          {codeCommits && codeCommits.length > 0 && idea.repo && (
+            <div className="mt-12">
+              <h3 className="t-title mb-1">Code activity</h3>
+              <p className="t-meta mb-4">
+                From the linked repository — the execution layer downstream of
+                this page.
+              </p>
+              {codeCommits.map((c) => (
+                <a
+                  key={c.hash}
+                  href={c.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="commit-row hover:bg-white/60 transition-colors"
+                >
+                  <span className="mono text-xs text-faint">{c.hash}</span>
+                  <div>
+                    <p className="text-sm font-medium mb-0.5">{c.msg}</p>
+                    <p className="t-meta">
+                      {c.author} · {c.when}
+                    </p>
+                  </div>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-faint self-center">
+                    <path d="M7 17L17 7" />
+                    <path d="M8 7h9v9" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
